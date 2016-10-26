@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>  
+    <!--     this file must be the same with the  $hbase$/conf/ "hbase.rootdir" property   -->  
+    <property>  
+        <name>fs.default.name</name>  
+        <value>hdfs://data12:9000</value>  
+    </property>  
+    <!--     if the HMaster start servel seconds and then HMaster server abort ,you should remove the file hadooptmp and restart the hbase     -->  
+    <property>  
+        <name>hadoop.tmp.dir</name>  
+        <value>/home/qhl/tmp</value>  
+     </property>  
+	 
+    <property>  
+        <name>io.file.buffer.size</name>  
+        <value>131072</value>  
+    </property>  
+	
+	<property>
+		<name>fs.checkpoint.period</name>
+		<value>60</value>
+		<description>The number of seconds between two periodic checkpoints.</description>
+	</property>
+	
+	<property>
+		<name>fs.checkpoint.size</name>
+		<value>67108864</value>
+	</property>
+
+</configuration>  
+

@@ -1,0 +1,291 @@
+/**
+ * 
+ */
+package ict.ocrabase.main.java.client.cli;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.UUID;
+
+import ict.ocrabase.main.java.client.bulkload.BulkLoad;
+import ict.ocrabase.main.java.client.bulkload.TableInfo;
+import ict.ocrabase.main.java.client.index.IndexNotExistedException;
+import ict.ocrabase.main.java.client.index.IndexQuerySQL;
+import ict.ocrabase.main.java.client.index.IndexResultScanner;
+import ict.ocrabase.main.java.client.index.IndexTable;
+import ict.ocrabase.main.java.regionserver.client.SqlParser;
+import ict.ocrabase.main.java.regionserver.client.SqlStatus;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.HColumnDescriptor;
+import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.MasterNotRunningException;
+import org.apache.hadoop.hbase.ZooKeeperConnectionException;
+import org.apache.hadoop.hbase.client.HBaseAdmin;
+import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.filter.FirstKeyOnlyFilter;
+
+/**
+ * @author Mid Liu
+ * 
+ */
+public class TestInstall {
+
+	/**
+	 * @param args
+	 * @throws Exception 
+	 */
+	public static void main(String[] args) throws Exception {
+		try {
+			opt = new Options();
+			setUsage();
+			cli = new GnuParser().parse(opt, args);
+		} catch (ParseException e) {
+			e.printStackTrace();
+			LOG.error(e);
+		}
+		exec();
+	}
+
+	private static void setUsage() {
+		OptionBuilder.hasArg();
+		OptionBuilder.withLongOpt("row");
+		OptionBuilder.withDescription("how many rows to generate");
+		Option row = OptionBuilder.create("r");
+		opt.addOption(row);
+
+		OptionBuilder.withLongOpt("help");
+		OptionBuilder.withDescription("print this message");
+		Option help = OptionBuilder.create("h");
+		opt.addOption(help);
+	}
+
+	private static void exec() throws Exception {
+		if (cli.hasOption("h")) {
+			HelpFormatter formatter = new HelpFormatter();
+			formatter.printHelp("ICTBase Test Installation", opt, true);
+			System.exit(0);
+		}
+		if (cli.hasOption("r")) {
+			row = Long.valueOf(cli.getOptionValue("r"));
+		} else {
+			row = 10000;
+		}
+
+		genTestInfo();
+		genData();
+
+		boolean vaild = true;
+		if (!testCreateTable()) {
+			System.out.println("================================================================================");
+			System.out.println("Cannot create table!");
+			System.out.println("The operation will be aborted!");
+			System.out.println("================================================================================");
+			System.exit(-1);
+		}
+		if (testImport()) {
+			System.out.println("--------------------------------------------------------------------------------");
+			System.out.println("Import function is correct!");
+			System.out.println("--------------------------------------------------------------------------------");
+		} else {
+			vaild = false;
+			System.out.println("--------------------------------------------------------------------------------");
+			System.out.println("Test import failure!");
+			System.out.println("--------------------------------------------------------------------------------");
+		}
+		if (testQueryAndCal()) {
+			System.out.println("--------------------------------------------------------------------------------");
+			System.out.println("Query function is corrent!");
+			System.out.println("--------------------------------------------------------------------------------");
+		} else {
+			vaild = false;
+			System.out.println("--------------------------------------------------------------------------------");
+			System.out.println("Test query failure");
+			System.out.println("--------------------------------------------------------------------------------");
+		}
+
+		if (vaild) {
+			System.out.println("\n");
+			System.out.println("================================================================================");
+			System.out.println("All function module is corrent!");
+			System.out.println("================================================================================");
+			System.out.println("\n");
+		} else {
+			System.out.println("\n");
+			System.out.println("================================================================================");
+			System.out.println("Test failure!");
+			System.out
+					.println("Some function modules maybe broken or not correctly installed!");
+			System.out.println("================================================================================");
+			System.out.println("\n");
+		}
+	}
+
+	private static void genData() {
+		System.out.println("Starting to generate data...");
+		String[] cmd = { "-t", "1", "-p", hdfs, "-r", String.valueOf(row) };
+		DataGen.main(cmd);
+		System.out.println("Generating data has accomplished!");
+	}
+
+	private static boolean testCreateTable() {
+		try {
+			Configuration conf = HBaseConfiguration.create();
+			HBaseAdmin admin;
+			admin = new HBaseAdmin(conf);
+			HTableDescriptor tableDescripter = new HTableDescriptor(
+					tm.getBytes());
+			tableDescripter.addFamily(new HColumnDescriptor("CF1"));
+			tableDescripter.addFamily(new HColumnDescriptor("CF2"));
+			admin.createTable(tableDescripter);
+		} catch (MasterNotRunningException e) {
+			e.printStackTrace();
+			LOG.error(e);
+			return false;
+		} catch (ZooKeeperConnectionException e) {
+			e.printStackTrace();
+			LOG.error(e);
+			return false;
+		} catch (IOException e) {
+			e.printStackTrace();
+			LOG.error(e);
+			return false;
+		}
+		return true;
+	}
+
+	private static boolean testImport() {
+		try {
+			System.out.println("Starting to import data...");
+			TableInfo ti = new TableInfo(ts);
+			BulkLoad bl = new BulkLoad(ti, hdfs, "u");
+			bl.run();
+			while (!bl.isComplete()) {
+				System.out.print("\r");
+				System.out.print("Import progress is: " + bl.getProgress()
+						+ "%");
+				Thread.sleep(1000);
+			}
+			System.out.println("Import data has accomplished!");
+
+			Scan scan = new Scan();
+			scan.setCacheBlocks(false);
+			scan.setCaching(1000);
+			scan.setFilter(new FirstKeyOnlyFilter());
+
+			HTable table = new HTable(tm);
+			ResultScanner rs = table.getScanner(scan);
+			long count = 0;
+			for (Result r : rs) {
+				if (!r.isEmpty()) {
+					count++;
+				}
+			}
+
+			System.out
+					.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+			System.out.println("Generated data number is: " + row);
+			System.out.println("Imported data number is: " + count);
+			System.out
+					.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+
+			if (count == row) {
+				return true;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			LOG.error(e);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			LOG.error(e);
+		}
+		return false;
+	}
+
+	private static boolean testQueryAndCal() throws Exception {
+
+		try {
+			long count1 = 0;
+			long count2 = 0;
+			Configuration conf = HBaseConfiguration.create();
+			IndexTable table = null;
+			IndexQuerySQL sql = new IndexQuerySQL("select CF1:col1 from " + tm
+					+ " where CF1:col1<6");
+			table = new IndexTable(conf, sql.getTableName());
+			IndexResultScanner resultScanner = table.getScanner(sql);
+			Result result = null;
+			while ((result = resultScanner.next()) != null) {
+				if (result.isEmpty()) {
+					break;
+				}
+			}
+			count1 = resultScanner.getTotalCount();
+
+			SqlParser sqlParser = new SqlParser("select count(CF1:col1) from "+ tm + " where CF1:col1<6", conf);
+    		boolean status = sqlParser.startParser();
+    		if (!status) {
+    			throw new SQLException("Parser SqlLine Exception");
+    		}
+    		
+    		SqlStatus sqlStatus = new SqlStatus(sqlParser.getSqlResult(), conf);
+    		status = sqlStatus.startSearch();
+    		if(status == false){
+    			throw new Exception("Executing calculation failed!");
+    		}
+			count2 = sqlStatus.getStatResult().getTotalrownum();
+
+			System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+			System.out.println("The result of query is: " + count1);
+			System.out.println("The result of calculation is: " + count2);
+			System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+
+			if (count1 == count2) {
+				return true;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			LOG.error(e);
+		} catch (IndexNotExistedException e) {
+			e.printStackTrace();
+			LOG.error(e);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			LOG.error(e);
+		}
+		return false;
+	}
+
+	private static void genTestInfo() {
+		String uuid = UUID.randomUUID().toString();
+		uuid = uuid.substring(0, 8) + uuid.substring(9, 13)
+				+ uuid.substring(14, 18) + uuid.substring(19, 23)
+				+ uuid.substring(24);
+		hdfs = "/test" + uuid;
+		LOG.debug("hdfs path is: " + hdfs);
+		tm = "test" + uuid;
+		LOG.debug("generated table name is: " + tm);
+		ts = tm+ ",9,CF1:col1:int,CF1:col2:long,CF1:col3:double,CF1:col4:string,CF2:col5:string,CF2:col6:String,CF2:col7:string,CF2:col8:int";
+		LOG.debug("table struct is: " + ts);
+	}
+
+	private static Options opt;
+	private static CommandLine cli;
+	private static String hdfs;
+	private static String tm;
+	private static String ts;
+	private static long row;
+	private static final Log LOG = LogFactory.getLog(TestInstall.class);
+}

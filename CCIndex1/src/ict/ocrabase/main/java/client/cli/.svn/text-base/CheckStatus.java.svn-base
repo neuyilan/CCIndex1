@@ -1,0 +1,311 @@
+
+package ict.ocrabase.main.java.client.cli;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.ClusterStatus;
+import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.MasterNotRunningException;
+import org.apache.hadoop.hbase.ZooKeeperConnectionException;
+import org.apache.hadoop.hbase.client.HBaseAdmin;
+import org.apache.hadoop.hbase.ipc.HMasterInterface;
+
+public class CheckStatus {
+	private static Options opt;
+	private static CommandLine cli;
+	private static List<String> regionservers;
+	
+	/**
+	 * check whether the cluster set up successfully
+	 * 
+	 * @return flag of success or failed
+	 * @param ha
+	 *          HBaseAdmin
+	 * @throws IOException
+	 */
+	private static String checkSetup(HBaseAdmin ha) throws IOException{
+	    BufferedReader read = null;
+	    String line = null;
+	    URL regionserversURL = CheckStatus.class.getClassLoader().getResource("regionservers");
+	    try{
+	    	regionservers = new ArrayList<String>();
+	    	read = new BufferedReader(new InputStreamReader(
+					new FileInputStream(new File(regionserversURL.getPath()))));
+			while ((line = read.readLine()) != null && line.trim() != null) {
+				regionservers.add(line);
+			}
+			read.close();
+	    }catch (Exception e){
+	    	throw new IOException("Get regionservers failed:"
+					+ e.getClass().getSimpleName());
+	    }
+    	String warn = " ";
+    	HMasterInterface hmi = ha.getMaster();
+	    if(hmi.getClusterStatusL() != null){
+	    	int liveRegionservers = ha.getMaster().getClusterStatusL().getServers();
+	    	int totalRegionservers = regionservers.size();
+
+	    	if(liveRegionservers == totalRegionservers){
+	    		warn = "successfully!";
+	    	}else{
+	    		warn = "failed!" + "\n" + "Some region servers set up failed!";
+	    	}
+	    }else{
+	    	warn = "failed!" + "\n" + "Cannot get cluster status!";
+	    }
+	    return warn;
+	}
+	
+	/**
+	 * check whether the cluster setup status circularly
+	 * 
+	 * @return clue of success or failed
+	 * @param ha
+	 *          HBaseAdmin
+	 * @throws IOException, InterruptedException
+	 */
+	private static String isSetupSuc(HBaseAdmin ha) throws IOException,InterruptedException{
+		String warn = "";
+		try{
+		warn = checkSetup(ha);
+		int num = 0;
+		while((!warn.equals("successfully!"))&&num<=10){
+			Thread.sleep(1000);
+			warn = checkSetup(ha);
+			num++;
+		}
+		}catch(Exception e){
+			System.out.println("***cluster set up failed!***");
+			System.out.println("   get cluster information failed!");
+			e.printStackTrace();
+		}
+//		if(warn.equals("successfully!")){
+//			return "cluster set up " + warn;
+//		}else{
+//			return "cluster set up " + warn;
+//		}
+		return "cluster set up " + warn;
+	}
+	
+	/**
+	 * check whether the master is running
+	 * 
+	 * @return flag of running or not
+	 * @param ha
+	 *          HBaseAdmin
+	 * @throws IOException
+	 */
+	private static boolean isRunningCheck(HBaseAdmin ha) throws IOException{
+		return ha.isMasterRunning();
+	}
+	
+	/**
+	 * check the status of cluster
+	 * 
+	 * @return information of cluster
+	 * @param ha
+	 *          HBaseAdmin
+	 * @throws IOException
+	 */
+	private static String status(HBaseAdmin ha) throws IOException{
+		ClusterStatus cs = ha.getMaster().getClusterStatusL();
+		String warn = "";
+		if(cs != null){
+			int deadServers = cs.getDeadServers();
+			int servers = cs.getServers();
+			Collection<String> deadServersName = cs.getDeadServerNames();
+			warn = "servers: " + servers + "; dead: " + deadServers;
+			if(!deadServersName.isEmpty()){
+				warn = warn + ", ";
+				for(String name: deadServersName){
+					warn = warn + name + ", ";
+				}
+				warn = warn.substring(0, warn.length()-2) + " is dead";
+			}
+		}else{
+			warn = "cluster set up failed!" + "\n" + "Cannot get cluster status!";
+		}
+	    return warn;
+	}
+	
+	/**
+	 * method provide for another class to check
+	 * @throws InterruptedException 
+	 * @throws IOException 
+	 */
+	public static String checkSetup(Configuration conf) 
+			throws IOException, InterruptedException{
+		String warn;
+		HBaseAdmin hbaseAdmin = null;
+		for(int i = 0;i<=6;i++){
+			boolean retry = false;
+			hbaseAdmin = new HBaseAdmin(conf);
+			retry = true;
+			if(i == 6){
+				System.out.print("\n###the cluster setup is failed!###\n");
+			}
+			
+			if(retry){
+				if(i == 6)
+					break;
+				Thread.sleep(2000*((long)Math.pow(2,i)));
+//				System.out.print("time:"+(long)Math.pow(2,i)+"retry:"+retry+"\n");
+			}else{
+				break;
+			}
+		}
+
+		warn = isSetupSuc(hbaseAdmin);
+		warn = "***" + warn + "***" + "        ";
+		warn += status(hbaseAdmin);
+		warn = "***" + warn + "***";
+		System.out.print("\n");
+		System.out.println(warn);
+		return warn; 
+	}
+	/**
+	 * set usage of the command
+	 * 
+	 *
+	 */
+	private static void setUsage() {
+		//OptionBuilder.hasArg();
+		OptionBuilder.withLongOpt("running");
+		OptionBuilder.withArgName("checkIsRunning");
+		OptionBuilder.withDescription("check whether the master is running");
+		Option running = OptionBuilder.create("r");
+		opt.addOption(running);
+
+		//OptionBuilder.hasArg();
+		OptionBuilder.withLongOpt("status");
+		OptionBuilder.withArgName("checkClusterStatus");
+		OptionBuilder.withDescription("check the current status of cluster");
+		Option status = OptionBuilder.create("s");
+		opt.addOption(status);
+
+		OptionBuilder.withLongOpt("help");
+		OptionBuilder.withDescription("print this message");
+		Option help = OptionBuilder.create("h");
+		opt.addOption(help);
+	}
+	
+	
+	/**
+	 * execute
+	 * @throws InterruptedException 
+	 * 
+	 * @throws IOException, InterruptedException, ClassNotFoundException, ZooKeeperConnectionException
+	 */
+	private static void exec() 
+			throws InterruptedException, IOException{
+		if (cli.hasOption("h")) {
+			HelpFormatter formatter = new HelpFormatter();
+			formatter.printHelp("ICTBase StatusCheck", opt, true);
+			System.exit(0);
+		}
+		if (cli.getOptions().length!=1 || (!cli.hasOption("r") && !cli.hasOption("s"))) {
+			System.err.println("Missing arguments!");
+			HelpFormatter formatter = new HelpFormatter();
+			formatter.printHelp("ICTBase StatusCheck", opt, true);
+			System.exit(-1);
+		}
+		
+		
+		HBaseAdmin hbaseAdmin = null;
+		
+		for(int i = 0;i<6;i++){
+			boolean retry = false;
+			try{
+				Configuration conf = HBaseConfiguration.create();
+				hbaseAdmin = new HBaseAdmin(conf);
+			}catch (Exception e) {
+				// TODO: handle exception
+				retry = true;
+				if(i == 6){
+					System.out.print("\n###the cluster setup is failed!###\n");
+					System.out.println("cause by: get HBaseAdmin failed!");
+					e.printStackTrace();
+				}
+			}
+			
+			if(retry){
+				if(i == 6)
+					break;
+				Thread.sleep(1000*((long)Math.pow(2,i)));
+//				System.out.print("time:"+(long)Math.pow(2,i)+"retry:"+retry+"\n");
+			}else{
+				break;
+			}
+		}
+		
+		String warn = "";
+		if(cli.hasOption("r")){
+			try {
+				warn = isSetupSuc(hbaseAdmin);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				System.out.println("The reason, please check!");
+				e.printStackTrace();
+			}
+			warn = "***" + warn + "***" + "\n";
+			System.out.print("\n");
+			System.out.print(warn);
+			try {
+				warn = status(hbaseAdmin);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				System.out.println("The reason, please check!");
+				e.printStackTrace();
+			}
+			warn = "***" + warn + "***" + "\n";
+			System.out.print("\n");
+			System.out.print(warn);
+			if(isRunningCheck(hbaseAdmin))
+			    System.exit(2);
+			else 
+				System.exit(3);
+		}
+		if(cli.hasOption("s")){
+			warn = status(hbaseAdmin);
+			warn = "***" + warn + "***" + "\n";
+			System.out.print("\n");
+			System.out.print(warn);
+            System.exit(4);	
+		}
+	}
+	
+	public static void main(String[] args) {
+		try{
+			opt = new Options();
+			setUsage();
+			cli = new GnuParser().parse(opt, args);
+			exec();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e){
+			e.printStackTrace();
+		}
+	    
+	}
+}
+

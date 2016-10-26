@@ -1,0 +1,226 @@
+package ict.ocrabase.main.java.client.cli;
+
+import ict.ocrabase.main.java.jdbc.WebJDBC;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.HBaseConfiguration;
+
+/**
+ * For user running query execution 
+ * @author LiuWei
+ * 
+ */
+public class Query {
+	
+    public static void main(String[] args) throws Exception {
+    	Query query = new Query();
+  
+    	if(query.initialize(args)){
+    		Configuration conf = HBaseConfiguration.create();
+            FileWriter fw = null;
+            BufferedWriter bw = null;
+            String ip    = conf.get("hbase.zookeeper.quorum");
+            String port  = conf.get("hbase.zookeeper.property.clientPort", "2181");
+            String usr   = conf.get("hbase.client.user","admin");
+            String pwd   = conf.get("hbase.client.passwd","admin");
+            WebJDBC web  = new WebJDBC("jdbc:ictbase://"+ip+":"+port,usr,pwd);
+            String sql = query.cli.getOptionValue("s");
+            try{
+        		if(!web.execute(sql)){
+        			System.out.println("Execute successfully!");
+        		}else{
+        			long num = 0;
+            		String columns[] = web.getColumns();
+            		String result[] = null;
+            		
+                    if (query.cli.hasOption("f")) {
+                        File file = new File(query.cli.getOptionValue("f"));
+                        if (!file.exists()) {
+                            file.createNewFile();
+                            fw = new FileWriter(file);
+                            bw = new BufferedWriter(fw);
+                            for(int i=0;i<columns.length;i++){
+                    			if(i==0){
+                    				bw.write(columns[i]);
+                    			}else{
+                    				bw.write("\t"+columns[i]);
+                    			}
+                    		}
+                            bw.write("\n");
+                            while((result = web.next())!=null){
+                            	String wri = "";
+                            	for(int i=0;i<result.length;i++){
+                            		if(i==0){
+                            			wri += result[i];
+                            		}else{
+                            			wri += "\t"+result[i];
+                            		}
+                            	}
+                            	bw.write(wri+"\n");
+                    			num ++;
+                                if(!query.isCalculation(sql) && num!=0 && num%100==0) {
+                                	System.out.println(num + " results has been written into file.");
+                                }
+                    		}
+                    		return ;
+                        } else {
+                            System.out.println("File " + query.cli.getOptionValue("f") + " already exists!");
+                            System.exit(-1);
+                        }
+                    }
+                    
+                    num = 0;
+                    long startTime = System.currentTimeMillis();
+                    long endTime = 0;
+                    long interval = 0;
+                    while((result = web.next())!=null){
+            			for(int i=0;i<result.length;i++){
+            				if(i==0){
+            					System.out.print(columns[i]+":"+result[i]);
+            				}else{
+            					System.out.print(","+columns[i]+":"+result[i]);
+            				}
+            			}
+            			System.out.println();
+            			num++;
+            			if(num%400==0){
+            				endTime = System.currentTimeMillis();
+            				interval = endTime - startTime;
+            				if(interval!=0){
+            					System.out.println("total count: "+num+" , time used: "+interval/1000.0+" seconds ,speed: "+(num*1000)/interval+" results per second !");
+            				}
+            			}
+            		}
+                    endTime = System.currentTimeMillis();
+    				interval = endTime - startTime;
+                    if(interval!=0){
+                    	System.out.println("Results: "+num+" , time used: "+interval/1000.0+" seconds ,speed: "+(num*1000)/interval+" results per second !");
+                    }
+        		}
+    		}catch(Exception e){
+    			System.err.println("Invaild arguments or no command!");
+        		query.printHelp();
+                e.printStackTrace();
+    		}finally{
+           	 	try {
+           	 		if(web!=null){
+           	 			web.close();
+           	 		}
+					if(bw!=null){
+						bw.flush();
+						bw.close();
+					}
+           	 	} catch (Exception e) {
+           	 		e.printStackTrace();
+           	 	}
+    		}
+    	}else{
+    		System.out.println("SQL string is in error type or connection to database is not avaliable!");
+    		query.printHelp();
+    	}	
+    }
+    /**
+     * Judge if the sql String is a calculation sql 
+     * @param sql: the sql string
+     * @return ture if it's a calculation sql, false if not
+     */
+	private boolean isCalculation(String sql)
+	{
+		Pattern pattern = Pattern.compile("select[ ]+(.+)[ ]+from[ ]+",Pattern.CASE_INSENSITIVE);
+		Matcher matcher = pattern.matcher(sql);
+		if(matcher.find()){
+			String select_list = matcher.group(1);
+			select_list = select_list.replaceAll(" ", "");
+			if(select_list.contains("count(") || select_list.contains("sum(") || select_list.contains("avg(")){
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * setFormat of the help information
+	 */
+    protected  void setFormat() {
+        OptionBuilder.hasArg();
+        OptionBuilder.withLongOpt("source");
+        OptionBuilder.withArgName("sql or file path");
+        OptionBuilder.withDescription("sql like query language");
+        Option string = OptionBuilder.create("s");
+        opt.addOption(string);
+
+        OptionBuilder.withLongOpt("help");
+        OptionBuilder.withDescription("print this message");
+        Option help = OptionBuilder.create("h");
+        opt.addOption(help);
+
+        OptionBuilder.hasArg();
+        OptionBuilder.withLongOpt("filePath"); 
+        OptionBuilder.withDescription("put result into this file");
+        Option filePath = OptionBuilder.create("f");
+        opt.addOption(filePath);
+    }
+ 
+    /**
+     * initialize the Query instance
+     * @param args
+     * @return
+     */
+    public boolean initialize(String[] args) {
+        this.opt = new Options();
+        this.setFormat();
+        try {
+			this.cli = new GnuParser().parse(this.opt, args);
+		} catch (ParseException e) {
+			System.err.println("Invaild arguments or no command!");
+            this.printHelp();
+            LOG.error(e);
+		}
+        if (cli.hasOption("h")) {
+            if (!cli.hasOption("s") && !cli.hasOption("f")) {
+            	printHelp();
+                System.exit(-1);
+            } else {
+                System.out.println(" '-h' must be used alone!\n");
+                System.exit(-1);
+            }
+        } else if (!cli.hasOption("s") && cli.hasOption("f")) {
+            System.out.println(" Only if '-s' exists can '-f' be used!");
+            System.exit(-1);
+        } else if (cli.hasOption("s")) {
+        	return true;
+        } else {
+            System.err.println("Invaild arguments or no command!");
+            this.printHelp();
+            System.exit(-1);
+        }
+    	return true;
+    }
+    /**
+     * print help information
+     */
+    public void printHelp() {
+    	HelpFormatter formatter = new HelpFormatter();
+		formatter.printHelp("./query ", opt, true);
+    }
+
+    private  Options opt;
+    private  CommandLine cli;
+    private static final Log LOG = LogFactory.getLog(Query.class.getName());
+}

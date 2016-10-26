@@ -1,0 +1,26 @@
+config.setInt("bulkload.separator",(int) (char)t.getSeparator());
+		Job job = new Job(config, "IncUDRowkeyImport");
+		job.setJarByClass(MRImport.class);
+
+		//***********************qihouliang**************************/
+		System.out.println("are you comming------------------------->");
+		//***********************qihouliang**************************/
+		
+		Path fileArray[] = files.toArray(new Path[0]);
+		FileInputFormat.setInputPaths(job, fileArray);
+		FileOutputFormat.setOutputPath(job, outputDir);
+
+		job.setMapperClass(IncUDRowkeyMapper.class);
+		job.setNumReduceTasks(0);
+
+		job.setOutputKeyClass(Text.class);
+		job.setOutputValueClass(KeyValue[].class);
+
+		job.setInputFormatClass(KeyValueInput.class);
+		
+		job.setOutputFormatClass(HFileOutput.class);
+
+				
+		job.submit();
+		
+		runJob= job;

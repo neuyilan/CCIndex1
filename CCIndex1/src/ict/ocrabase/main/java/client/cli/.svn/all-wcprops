@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/pezy/!svn/ver/670/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/cli
+END
+Cli.java
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/pezy/!svn/ver/346/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/cli/Cli.java
+END
+CheckStatus.java
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/pezy/!svn/ver/346/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/cli/CheckStatus.java
+END
+TestInstall.java
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/pezy/!svn/ver/532/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/cli/TestInstall.java
+END
+ParallelCount.java
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svn/pezy/!svn/ver/451/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/cli/ParallelCount.java
+END
+Query.java
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/pezy/!svn/ver/670/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/cli/Query.java
+END
+DataGen.java
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/pezy/!svn/ver/346/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/cli/DataGen.java
+END
+Import.java
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/pezy/!svn/ver/532/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/cli/Import.java
+END
+DataGenGAB.java
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/pezy/!svn/ver/346/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/cli/DataGenGAB.java
+END

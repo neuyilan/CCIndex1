@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/pezy/!svn/ver/555/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/bulkload/noindex
+END
+IncrementalRowkeyMapper.java
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/svn/pezy/!svn/ver/555/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/bulkload/noindex/IncrementalRowkeyMapper.java
+END
+KeyValueInput.java
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svn/pezy/!svn/ver/555/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/bulkload/noindex/KeyValueInput.java
+END
+HFileOutput.java
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/svn/pezy/!svn/ver/346/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/bulkload/noindex/HFileOutput.java
+END
+UserDefinedRowkeyMapper.java
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/svn/pezy/!svn/ver/346/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/bulkload/noindex/UserDefinedRowkeyMapper.java
+END
+IncUDRowkeyMapper.java
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/svn/pezy/!svn/ver/555/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/bulkload/noindex/IncUDRowkeyMapper.java
+END
+KVReducer.java
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/svn/pezy/!svn/ver/555/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/bulkload/noindex/KVReducer.java
+END

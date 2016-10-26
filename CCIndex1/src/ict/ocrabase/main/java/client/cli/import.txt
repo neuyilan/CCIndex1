@@ -1,0 +1,17 @@
+-s /right1 -ts test_table,SEMICOLON,f1:num:STRING,f2:state:STRING,f3:price:STRING,f4:datet:STRING,f5:rank:STRING,f6:clerk:STRING,f7:ol:STRING,f8:desc:STRING -l 32
+
+
+
+according to the class------->CreateTableTestBulkload
+-s /index-data -ts test_table_index,SEMICOLON,f1:num:STRING,f2:state:STRING,f3:price:STRING,f4:datet:STRING:CCINDEX:test_table_f4,f5:rank:STRING,f6:clerk:STRING,f7:ol:STRING,f8:desc:STRING -l 32
+
+
+
+according to the text:CCIndex_bulkload_noindex_orderedkey.txt(here have index,although the file name is noindex)
+-s /orderkey -ts test_table_orderkey,SEMICOLON,f1:num:STRING,f2:state:STRING,f3:price:STRING,f4:datet:STRING,f5:rank:STRING:CCINDEX:test_table_f5,f6:clerk:STRING,f7:ol:STRING,f8:desc:STRING -l 32
+
+
+
+
+according to the text:CCIndex_bulkload_index_large.txt
+-s /large -ts large_table,SEMICOLON,f1:num:STRING,f2:state:STRING,f3:price:STRING,f4:datet:STRING:CCINDEX:large_table_f4,f5:rank:STRING,f6:clerk:STRING,f7:ol:STRING,f8:desc:STRING -l 32

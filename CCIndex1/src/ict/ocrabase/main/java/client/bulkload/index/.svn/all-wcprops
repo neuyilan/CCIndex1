@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/pezy/!svn/ver/566/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/bulkload/index
+END
+IndexFromTextMapper.java
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/svn/pezy/!svn/ver/555/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/bulkload/index/IndexFromTextMapper.java
+END
+IndexFromTableReducer.java
+K 25
+svn:wc:ra_dav:version-url
+V 123
+/svn/pezy/!svn/ver/555/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/bulkload/index/IndexFromTableReducer.java
+END
+NoKeyTextIndexMapper.java
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/svn/pezy/!svn/ver/555/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/bulkload/index/NoKeyTextIndexMapper.java
+END
+IndexSampler.java
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/svn/pezy/!svn/ver/566/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/bulkload/index/IndexSampler.java
+END
+IndexFromTableMapper.java
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/svn/pezy/!svn/ver/555/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/bulkload/index/IndexFromTableMapper.java
+END
+IndexFromTextReducer.java
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/svn/pezy/!svn/ver/555/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/bulkload/index/IndexFromTextReducer.java
+END

@@ -1,0 +1,61 @@
+config.set("mapreduce.totalorderpartitioner.path", tempDir.toString()+"/"+t.getTableName()+"_partition.lst");
+		config.setInt("bulkload.separator",(int) (char)t.getSeparator());
+		Job job = new Job(config, "IndexFromTextUD");
+		job.setJarByClass(MRImport.class);
+
+		Path fileArray[] = files.toArray(new Path[0]);
+		FileInputFormat.setInputPaths(job, fileArray);
+		FileOutputFormat.setOutputPath(job, outputDir);
+
+		job.setMapperClass(IndexFromTextMapper.class);
+		job.setReducerClass(IndexFromTextReducer.class);
+		job.setNumReduceTasks(reduceNum);
+
+		job.setMapOutputKeyClass(ImmutableBytesWritable.class);
+		job.setMapOutputValueClass(Text.class);
+		job.setOutputKeyClass(Text.class);
+		job.setOutputValueClass(KeyValue[].class);
+
+
+		job.setInputFormatClass(KeyValueInput.class);
+		
+		job.setOutputFormatClass(HFileOutput.class);
+		
+		job.setPartitionerClass(TotalOrderPartitioner.class);
+		
+////////////////////////////////////qihouliang-test////////////////////////////
+//System.out.println("t.toString()--------------->"+t.toString());
+//System.out.println("job.toString()--------------->"+job.toString());
+//for(int i=0;i<fileArray.length;i++){
+//	System.out.println("fileArray[--------------->"+i+"]"+fileArray[i].toString());
+//}
+////////////////////////////////////qihouliang-test////////////////////////////
+		IndexSampler s = new IndexSampler(t.toString(), fileArray, job);
+		
+		while(!s.isComplete()){
+			progress = (float)(0.2*s.getProgress());
+			Thread.sleep(1000);
+		}
+		
+		if(s.isSuccessful())
+			s.writePartitionFile();
+		else
+			throw new IOException("Sampler faild! Please check the jobtracker web page for more detail.");
+
+		job.submit();
+		runJob = job;
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		

@@ -1,0 +1,589 @@
+/**
+ * 
+ */
+package ict.ocrabase.main.java.client.cli;
+
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.hadoop.io.compress.SwiftCodec;
+import org.apache.hadoop.mapreduce.InputFormat;
+import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.RecordReader;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+/**
+ * This class is aim to generate test data in HDFS.
+ * 
+ * @author Mid Liu
+ * 
+ */
+public class DataGenGAB {
+	private static class DataGenMapper extends
+			Mapper<NullWritable, NullWritable, Text, Text> {
+
+		public void map(NullWritable n1, NullWritable n2,
+				Mapper<NullWritable, NullWritable, Text, Text>.Context context)
+				throws java.io.IOException, InterruptedException {
+			Configuration conf = context.getConfiguration();
+			totalRow = conf.getLong("row", 1);
+			int type = conf.getInt("type", 1);
+			int mn = conf.getInt("nmapinputformat.num.maps", 128);
+
+			int taskId = context.getTaskAttemptID().getTaskID().getId();
+			if (taskId != mn - 1) {
+				for (long i = 0; i < totalRow / mn; i++) {
+					context.write(
+							new Text(genRow(type, taskId * (totalRow / mn) + i)),
+							null);
+					long per = i / (totalRow / mn);
+					context.setStatus(String.valueOf(per));
+				}
+			} else {
+				for (long i = 0; i < totalRow - taskId * (totalRow / mn); i++) {
+					context.write(
+							new Text(genRow(type, taskId * (totalRow / mn) + i)),
+							null);
+					long per = i / (totalRow / mn);
+					context.setStatus(String.valueOf(per));
+				}
+			}
+		}
+
+		private static String genRow(int clazz, long startNum) {
+			String row = "";
+			row = "mzid:"+genMzid()+"^"+"uv:"+genUv()+"^"+"caid:"+genCaid()+"^"+"spid:"+genSpid()+"^"
+			+"eid:"+genEid()+"^"+"pids:"+genPids()+"^"+"chid:"+genChid()+"^"+"wid:"+genWid()+"^"
+			+"br:"+genBr()+"^"+"os:"+genOs()+"^"+"scl:"+genScl()+"^"+"dpi:"+genDpi()+"^"+"fla:"+genFla()+"^"
+			+"java:"+genJava()+"^"+"_1:"+gen_1()+"^"+"_2:"+gen_2()+"^"+"lan:"+genLan()+"^"+"ip:"+genIp()+"^"
+			+"loc:"+genLoc()+"^"+"ref:"+genRef()+"^"+"sek:"+genSek()+"^"+"minid:"+genMinid()+"^"+"kwid:"+genKwid()+"^"
+			+"uid:"+genUid()+"^"+"ver:"+genVer()+"^"+"YMDhms:"+genYMDnms();
+			return row;
+		}
+		
+		private static String genMzid()
+		{
+//			String oneWord = "";
+//			String[] word = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
+//					"k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v",
+//					"w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7",
+//					"8", "9" };
+//			for(int i=0;i<20;i++){
+//				oneWord += word[r.nextInt(36)];
+//			}
+			return String.valueOf(r.nextInt(50000000));
+		}
+		
+		private static int genUv()
+		{
+			return (int) r.nextLong();
+		}
+		
+		private static int genCaid()
+		{
+			return (int) r.nextLong();
+		}
+		
+		private static String genSpid()
+		{
+			String[] word = { "3xxEY", "3xxEZ", "3xxEa", "3xxEb", "3xxEc", "3xxEd", "3xxEe", "3xxEf"
+					, "3xxEg", "3xxEh", "3xxEi", "3xxEj", "3xxEk", "3xxEl", "3xxEm", "3xxDZ", "3xxDa"
+					, "3xxDb", "3xxDc", "3xxDd", "3xxDe", "3xxDf", "3xxDg", "3xxDh", "3xxDi", "3xxDj"
+					, "3xxDk", "3xxDl", "3xxDm", "3xxDn", "3xxDo", "3xxEK", "3xxEL", "3xxEM", "3xxEN"
+					, "3xxEO", "3xxEP", "3xxEQ", "3xxER", "3xxES", "3xxET", "3xxEU", "3xxEV", "3xxEW"
+					, "3xxEX","3xxDv","3xxDw","3xxDx","3xxDy","3xxDz","3xxE+","3xxE-","3xxE0","3xxE1"
+					,"3xxE2","3xxE3","3xxE4","3xxE5","3xxE6","3xxE7","3xxE8","3xxE9","3xxEA","3xxEB"
+					,"3xxEC","3xxED","3xxEE","3xxEF","3xxEG","3xxEH","3xxEI","3xxEJ","3xy8I","3xy8J"
+					,"3xy8K","3xyf+","3xyf-","3xyf4","3xyr5","3xysX","3xxDp","3xxDq","3xxDr"
+					,"3xxDs","3xxDt","3xxDu","3xxDG","3xy4u"};
+			return word[r.nextInt(word.length)];
+		}
+		
+		private static int genEid()
+		{
+			return r.nextInt();
+		}
+		
+		private static String genPids()
+		{
+			int length=r.nextInt(10);
+			String result = String.valueOf(r.nextInt(10000));
+			for(int i=1;i<length;i++)
+			{
+				result+=String.valueOf(r.nextInt(10000));
+			}
+			return result;
+		}
+		
+		private static int genChid()
+		{
+			return r.nextInt(100);
+		}
+		
+		private static int genWid()
+		{
+			return r.nextInt(10000);
+		}
+		
+		private static String genBr()
+		{
+			return "version-"+String.valueOf(r.nextInt(10))+"."+String.valueOf(r.nextInt(20));
+		}
+		private static String genOs()
+		{
+			String[] word = {"WIN7","WinXP","ubuntu"};
+			return word[r.nextInt(3)]+"-"+String.valueOf(r.nextInt(10))+"."+String.valueOf(r.nextInt(20));
+		}
+		
+		private static int genScl()
+		{
+			return r.nextInt(100000);
+		}
+		
+		private static int genDpi()
+		{
+			return r.nextInt(100000);
+		}
+	
+		private static String genFla()
+		{
+			return "version-"+String.valueOf(r.nextInt(10))+"."+String.valueOf(r.nextInt(20));
+		}
+		
+		private static boolean genJava()
+		{
+			if(r.nextInt(2)==1)
+			{
+				return true;
+			}
+			return false;
+		}
+		
+		private static int gen_1()
+		{
+			return r.nextInt(100000);
+		}
+		
+		private static int gen_2()
+		{
+			return r.nextInt(100000);
+		}
+		
+		private static int genLan()
+		{
+			return r.nextInt(400);
+		}
+		
+		private static String genIp()
+		{
+			return r.nextInt(256)+"."+r.nextInt(256)+"."+r.nextInt(256)+"."+r.nextInt(256);
+		}
+		
+		private static String genLoc()
+		{
+			String[] word = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
+					"k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v",
+					"w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7",
+					"8", "9" };
+			String result="www.";
+			for(int i=0;i<8;i++)
+			{
+				result+=word[r.nextInt(36)];
+			}
+			return result+".com";
+		}
+
+		private static String genRef()
+		{
+			String[] word = { "baidu.com", "sina.com", "renren.com", "163.com", "soho.com",
+			"skype.com"};
+			return "www."+word[r.nextInt(6)];
+		}
+		
+		private static String genSek()
+		{
+			String[] word = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
+					"k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v",
+					"w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7",
+					"8", "9" };
+			String result="";
+			int length = r.nextInt(15);
+			for(int i=0;i<length;i++)
+			{
+				result+=word[r.nextInt(36)];
+			}
+			return result;
+		}
+
+		private static int genMinid()
+		{
+			return r.nextInt(100000);
+		}
+		private static int genKwid()
+		{
+			return r.nextInt(1000000);
+		}
+
+		private static int genUid()
+		{
+			return r.nextInt(100000000);
+		}
+		
+		private static int genVer()
+		{
+			return r.nextInt(1000);
+		}
+
+		private static String genYMDnms()
+		{
+			String date = "";
+			long gap=(long)(1.5*365*24*3600*1000);
+			
+			Date d = new Date(System.currentTimeMillis()- (long)(Math.random()*gap));
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+			date = sdf.format(d);
+			return date;
+		}
+		
+		private static String genOneWord() {
+			String oneWord = "";
+			String[] word = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
+					"k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v",
+					"w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7",
+					"8", "9" };
+			oneWord = word[r.nextInt(36)];
+			return oneWord;
+		}
+
+		private static Random r = new Random();
+		private static long totalRow;
+	}
+
+	private static class NMapInputFormat extends
+			InputFormat<NullWritable, NullWritable> {
+		private static final String NMAPS_KEY = "nmapinputformat.num.maps";
+
+		@Override
+		public RecordReader<NullWritable, NullWritable> createRecordReader(
+				InputSplit split, TaskAttemptContext tac) throws IOException,
+				InterruptedException {
+			return new SingleRecordReader<NullWritable, NullWritable>(
+					NullWritable.get(), NullWritable.get());
+		}
+
+		@Override
+		public List<InputSplit> getSplits(JobContext context)
+				throws IOException, InterruptedException {
+			int count = getNumMapTasks(context.getConfiguration());
+			List<InputSplit> splits = new ArrayList<InputSplit>(count);
+			for (int i = 0; i < count; i++) {
+				splits.add(new NullInputSplit());
+			}
+			return splits;
+		}
+
+		public static int getNumMapTasks(Configuration conf) {
+			return conf.getInt(NMAPS_KEY, 1);
+		}
+
+		private static class NullInputSplit extends InputSplit implements
+				Writable {
+			@Override
+			public long getLength() throws IOException, InterruptedException {
+				return 0;
+			}
+
+			@Override
+			public String[] getLocations() throws IOException,
+					InterruptedException {
+				return new String[] {};
+			}
+
+			@Override
+			public void readFields(DataInput in) throws IOException {
+			}
+
+			@Override
+			public void write(DataOutput out) throws IOException {
+			}
+		}
+
+		private static class SingleRecordReader<K, V> extends
+				RecordReader<K, V> {
+
+			private final K key;
+			private final V value;
+			boolean providedKey = false;
+
+			SingleRecordReader(K key, V value) {
+				this.key = key;
+				this.value = value;
+			}
+
+			@Override
+			public void close() {
+			}
+
+			@Override
+			public K getCurrentKey() {
+				return key;
+			}
+
+			@Override
+			public V getCurrentValue() {
+				return value;
+			}
+
+			@Override
+			public float getProgress() {
+				return 0;
+			}
+
+			@Override
+			public void initialize(InputSplit split, TaskAttemptContext tac) {
+			}
+
+			@Override
+			public boolean nextKeyValue() {
+				if (providedKey)
+					return false;
+				providedKey = true;
+				return true;
+			}
+
+		}
+	}
+
+	/**
+	 * This is the constructor of class DataGen. Developer need to set arguments
+	 * to this constructor.
+	 * 
+	 * @param type
+	 *            data type to generate
+	 * @param row
+	 *            total rows to generate
+	 * @param path
+	 *            the path in HDFS to generate
+	 * @param mapNum
+	 *            the map number in MapReduce work
+	 * @param comp
+	 *            whether to use hardware compression
+	 */
+	public DataGenGAB(int type, long row, String path, int mapNum, boolean comp) {
+		isComplete = false;
+		progress = 0;
+		this.type = type;
+		this.row = row;
+		this.path = path;
+		this.mapNum = mapNum;
+		this.comp = comp;
+	}
+
+	/**
+	 * This method is aim to handle console invoking.
+	 * 
+	 * @param args
+	 *            console arguments
+	 */
+	public static void main(String args[]) {
+		try {
+			opt = new Options();
+			setUsage();
+			cli = new GnuParser().parse(opt, args);
+
+			if (cli.hasOption("h")) {
+				HelpFormatter formatter = new HelpFormatter();
+				formatter.printHelp("ICTBase DataGen", opt, true);
+				System.exit(0);
+			}
+			if (!cli.hasOption("t") || !cli.hasOption("r")
+					|| !cli.hasOption("p")) {
+				System.err.println("Missing arguments!");
+				HelpFormatter formatter = new HelpFormatter();
+				formatter.printHelp("ICTBase DataGen", opt, true);
+				System.exit(-1);
+			}
+
+			int type = Integer.valueOf(cli.getOptionValue("t"));
+			long row = Long.valueOf(cli.getOptionValue("r"));
+			String path = cli.getOptionValue("p");
+			int mapNum = 128;
+			if (cli.hasOption("mn")) {
+				mapNum = Integer.valueOf(cli.getOptionValue("mn"));
+			}
+			boolean comp = false;
+			if (cli.hasOption("comp")) {
+				comp = true;
+			}
+
+			DataGenGAB dg = new DataGenGAB(type, row, path, mapNum, comp);
+			dg.exec();
+			int progress = 0;
+			while (!dg.isComplete()) {
+				if (progress != dg.getProgress()) {
+					System.out.println("Generating data: " + dg.getProgress()
+							+ "%");
+					progress = dg.getProgress();
+				}
+				Thread.sleep(1000);
+			}
+			System.out.println("Data is successfully generated in hdfs!");
+		} catch (ParseException e) {
+			e.printStackTrace();
+			LOG.error(e.getMessage());
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			LOG.error(e.getMessage());
+		}
+	}
+
+	/**
+	 * After instantiating an object, developer should call this method to start
+	 * data generating.
+	 */
+	public void exec() {
+		try {
+			Configuration conf = new Configuration();
+			conf.setInt("nmapinputformat.num.maps", mapNum);
+			conf.setLong("row", row);
+			conf.setInt("type", type);
+			if (comp) {
+				conf.setBoolean("mapred.output.compress", true);
+				conf.setClass("mapred.output.compression.codec",
+						SwiftCodec.class, CompressionCodec.class);
+			}
+
+			final Job job = new Job(conf, "DataGen");
+			job.setJarByClass(DataGenGAB.class);
+			FileOutputFormat.setOutputPath(job, new Path(path));
+			job.setMapperClass(DataGenMapper.class);
+			job.setInputFormatClass(NMapInputFormat.class);
+			job.setMapOutputKeyClass(Text.class);
+			job.setMapOutputValueClass(Text.class);
+			job.setNumReduceTasks(0);
+
+			job.submit();
+
+			new Thread() {
+				public void run() {
+					try {
+						while (!job.isComplete()) {
+							progress = (int) (job.mapProgress() * 100);
+						}
+						isComplete = true;
+					} catch (IOException e) {
+						e.printStackTrace();
+						LOG.error(e.getMessage());
+					}
+				}
+			}.start();
+		} catch (IOException e) {
+			e.printStackTrace();
+			LOG.error(e.getMessage());
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			LOG.error(e.getMessage());
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			LOG.error(e.getMessage());
+		}
+	}
+
+	/**
+	 * This method will return the progress of current data generating.
+	 * 
+	 * @return current progress
+	 */
+	public int getProgress() {
+		return progress;
+	}
+
+	/**
+	 * This method will return whether the progress of current data generating
+	 * is complete.
+	 * 
+	 * @return whether the progress is complete
+	 */
+	public boolean isComplete() {
+		return isComplete;
+	}
+
+	private static void setUsage() {
+		OptionBuilder.hasArg();
+		OptionBuilder.withLongOpt("type");
+		OptionBuilder.withArgName("data type");
+		OptionBuilder.withDescription("which data type to generate");
+		Option type = OptionBuilder.create("t");
+		opt.addOption(type);
+
+		OptionBuilder.hasArg();
+		OptionBuilder.withLongOpt("row");
+		OptionBuilder.withArgName("row number");
+		OptionBuilder.withDescription("how much data to generate");
+		Option row = OptionBuilder.create("r");
+		opt.addOption(row);
+
+		OptionBuilder.hasArg();
+		OptionBuilder.withLongOpt("path");
+		OptionBuilder.withArgName("hdfs directory");
+		OptionBuilder
+				.withDescription("which position in hdfs to generate data");
+		Option path = OptionBuilder.create("p");
+		opt.addOption(path);
+
+		OptionBuilder.hasArg();
+		OptionBuilder.withLongOpt("map-number");
+		OptionBuilder.withArgName("map numbers");
+		OptionBuilder.withDescription("how many maps to generate data");
+		Option mapnumber = OptionBuilder.create("mn");
+		opt.addOption(mapnumber);
+
+		OptionBuilder.withLongOpt("compress");
+		OptionBuilder.withDescription("generate data with compression");
+		Option comp = OptionBuilder.create("comp");
+		opt.addOption(comp);
+
+		OptionBuilder.withLongOpt("help");
+		OptionBuilder.withDescription("print this message");
+		Option help = OptionBuilder.create("h");
+		opt.addOption(help);
+	}
+
+	private boolean isComplete;
+	private int progress;
+	private int type;
+	private long row;
+	private String path;
+	private int mapNum;
+	private boolean comp;
+	private static Options opt;
+	private static CommandLine cli;
+	private static final Log LOG = LogFactory.getLog(DataGenGAB.class);
+}

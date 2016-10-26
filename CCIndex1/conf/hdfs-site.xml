@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+	<property>
+		<name>dfs.datanode.handler.count</name>
+		<value>5</value>
+		<description>The number of server threads for the datanode.</description>
+	</property>
+	<property>
+		<name>dfs.namenode.handler.count</name>
+		<value>5</value>
+		<description>The number of server threads for the namenode.</description>
+	</property>
+	<property>
+		<name>dfs.replication</name>
+		<value>1</value>
+	</property>
+	<property>
+		<name>dfs.name.dir</name>
+		<!-- <value>/opt/newqhl/CCIndex/tmp/hdfs/name</value>   -->
+		<value>/home/qhl/tmp/hdfs/name</value>
+		<final>true</final>
+	</property>
+	<property>
+		<name>dfs.data.dir</name>
+		<!-- <value>/opt/newqhl/CCIndex/tmp/hdfs/data</value>   -->
+		<value>/home/qhl/tmp/hdfs/data</value>
+	<final>true</final>
+	</property>
+	<property>
+		<name>dfs.permissions</name>
+		<value>false</value>
+	</property>
+	<property>
+		<name>dfs.datanode.max.xcievers</name>
+		<value>8192</value>
+	</property>
+	<!-- 配置 namenode和secondary namenode，这里不在同一台机器上面 -->
+	<property>
+		<name>dfs.http.address</name>
+		<value>data12:50070</value>
+		<description>The address and the base port where the dfs namenode web ui will listen on.If the port is 0 then the server will start on a free port.</description>
+	</property>
+	<property>
+		<name>dfs.namenode.secondary.http-address</name>
+		<value>data12:50090</value>
+	</property>
+	<!-- 配置 namenode和secondary namenode，这里不在同一台机器上面 -->
+</configuration>

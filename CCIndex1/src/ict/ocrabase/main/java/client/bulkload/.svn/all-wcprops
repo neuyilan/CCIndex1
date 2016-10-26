@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/pezy/!svn/ver/566/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/bulkload
+END
+TableInfo.java
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/pezy/!svn/ver/556/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/bulkload/TableInfo.java
+END
+MRImport.java
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svn/pezy/!svn/ver/555/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/bulkload/MRImport.java
+END
+BulkLoadUtil.java
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svn/pezy/!svn/ver/346/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/bulkload/BulkLoadUtil.java
+END
+ImportConstants.java
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/pezy/!svn/ver/346/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/bulkload/ImportConstants.java
+END
+MRExport.java
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svn/pezy/!svn/ver/555/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/bulkload/MRExport.java
+END
+BulkLoad.java
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svn/pezy/!svn/ver/473/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/bulkload/BulkLoad.java
+END
+Sampler.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/pezy/!svn/ver/555/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/bulkload/Sampler.java
+END
+KeyValueArray.java
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svn/pezy/!svn/ver/346/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/bulkload/KeyValueArray.java
+END
+LoadHFiles.java
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/pezy/!svn/ver/400/ocrabase/trunk/src/main/java/ict/ocrabase/main/java/client/bulkload/LoadHFiles.java
+END
