@@ -20,28 +20,21 @@ import ict.ocrabase.main.java.client.bulkload.TableInfo;
  * @author Liu Wei
  * 
  */
-public class Import extends Cli {
+public class Import_1 extends Cli {
 
 	public static void main(String[] args) {
 		try {
-			Import imp = new Import();
+			Import_1 imp = new Import_1();
 			opt = new Options();
 
 			imp.setFormat();
 			cli = new GnuParser().parse(opt, args);
-//-s /out -ts test_table,COMMA,f1:row:INT,f2:rowrow:long,f3:state:string,f4:price:DOUBLE,f5:date1:string:CCINDEX:test-f5,f6:rank:String,f7:clerk:String,f8:ol:String,f9:desc:string, -l 32	
-////////////////////////////////////qihouliang-test////////////////////////////
-//			System.out.println(cli.toString());
-////////////////////////////////////qihouliang-test////////////////////////////
 
 			imp.checkArgs();
 
 			String type = null;
 			if (cli.hasOption("l")) {
 				type = "i " + cli.getOptionValue("l");
-////////////////////////////////////qihouliang-test////////////////////////////
-//System.out.println("type------------->"+type);
-////////////////////////////////////qihouliang-test////////////////////////////
 			} else {
 				type = "u";
 			}
@@ -51,10 +44,9 @@ public class Import extends Cli {
 				bl = new BulkLoad(imp.getTableStruct(),
 						cli.getOptionValue("s"), type);
 			} else {
-//				System.out.println("coming on this --------------------->qihouliang");
-				TableInfo tab = new TableInfo(imp.dealTableStruct(cli
+				TableInfo ts = new TableInfo(imp.dealTableStruct(cli
 						.getOptionValue("ts")));
-				bl = new BulkLoad(tab, cli.getOptionValue("s"), type);
+				bl = new BulkLoad(ts, cli.getOptionValue("s"), type);
 			}
 			if(cli.hasOption("p")) {
 				bl.preTest();
@@ -132,7 +124,7 @@ public class Import extends Cli {
 				System.out.println(" '-h' must be used alone!\n");
 				System.exit(-1);
 			} else {
-				Import.printHelp();
+				Import_1.printHelp();
 				System.exit(-1);
 			}
 		}
@@ -140,7 +132,7 @@ public class Import extends Cli {
 				|| cli.hasOption("l") || cli.hasOption("o") || cli
 					.hasOption("do"))) {
 			System.err.println("Invaild arguments or no order!");
-			Import.printHelp();
+			Import_1.printHelp();
 			System.exit(-1);
 		}
 		if (cli.hasOption("s") && cli.hasOption("ts")) {
@@ -212,11 +204,6 @@ public class Import extends Cli {
 	private static boolean isFilePath() {
 		String str = cli.getOptionValue("ts");
 		File file = new File(str);
-////////////////////////////////////qihouliang-test////////////////////////////
-//		System.out.println("str--------->"+str+"-------->qihouliang");
-//System.out.println("file.exists()--------->"+file.exists()+"-------->qihouliang");
-//System.out.println("file.isFile()--------->"+file.isFile()+"-------->qihouliang");
-////////////////////////////////////qihouliang-test////////////////////////////
 		if (file.exists() && file.isFile()) {
 			return true;
 		}

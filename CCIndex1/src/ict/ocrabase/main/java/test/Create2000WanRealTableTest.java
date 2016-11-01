@@ -16,62 +16,49 @@ import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.util.Bytes;
 
-public class CreateTableTestBulkload {
-//  private static final byte[] tableName = Bytes.toBytes("test4");  //large_table     test_table_index      test_table_orderkey 
-//	private static final byte[] tableName = Bytes.toBytes("test_table_index_3_f4");        //large_table_f4  test_table_index_f4   test_table_f5
-	private static final byte[] tableName = Bytes.toBytes("test_table");
-	private static Configuration conf;
+public class Create2000WanRealTableTest {
+  private static final byte[] tableName = Bytes.toBytes("2000wanreal");
+  private static final byte[] newTableName = Bytes.toBytes("New");
+  private static Configuration conf;
   private static IndexAdmin indexadmin;
-  private static HBaseAdmin admin;
-  private static HTableDescriptor desc;
-  private static IndexSpecification[] index;
   private static IndexTableDescriptor indexDesc;
-  
+  private static HBaseAdmin admin;
+  private static IndexSpecification[] index;
+  private static HTableDescriptor desc;
+  private static HTableDescriptor newdesc;
+  private static IndexTableDescriptor newIndexDesc;
+
   public static void main(String[] args) throws IOException, IndexExistedException {
     conf = HBaseConfiguration.create();
-    indexadmin = new IndexAdmin(conf);
+//    indexadmin = new IndexAdmin(conf);
     admin = new HBaseAdmin(conf);
+    // indexadmin.setTest(true);
 
     desc = new HTableDescriptor(TableName.valueOf(tableName));
-    
-   
-    HColumnDescriptor h1=new HColumnDescriptor(Bytes.toBytes("f"));
-    h1.setMaxVersions(10);
-    h1.setMinVersions(3);
-    desc.addFamily(h1);
-    
-//    for(int i=0;i<1;i++){
-//    	 HColumnDescriptor h1=new HColumnDescriptor(Bytes.toBytes("f"+(i+1)));
-////    	 h1.setMaxVersions(10);
-////    	 h1.setMinVersions(3);
-//    	 desc.addFamily(h1);
-//    }
-
-   
+    desc.addFamily(new HColumnDescriptor(Bytes.toBytes("f1")));
+    desc.addFamily(new HColumnDescriptor(Bytes.toBytes("f2")));
+    desc.addFamily(new HColumnDescriptor(Bytes.toBytes("f3")));
+    desc.addFamily(new HColumnDescriptor(Bytes.toBytes("f4")));
+    desc.addFamily(new HColumnDescriptor(Bytes.toBytes("f5")));
+    desc.addFamily(new HColumnDescriptor(Bytes.toBytes("f6")));
+    desc.addFamily(new HColumnDescriptor(Bytes.toBytes("f7")));
+    desc.addFamily(new HColumnDescriptor(Bytes.toBytes("f8")));
+    desc.addFamily(new HColumnDescriptor(Bytes.toBytes("f9")));
+    desc.addFamily(new HColumnDescriptor(Bytes.toBytes("f10")));
+//
 //    
-    index = new IndexSpecification[1];
-    index[0] = new IndexSpecification(Bytes.toBytes("f:c4"), IndexType.CCINDEX);
-//    
+//    index = new IndexSpecification[4];
+//    index[0] = new IndexSpecification(Bytes.toBytes("f1:c2"), IndexType.CCINDEX);
 //    //index[3] = new IndexSpecification(Bytes.toBytes("f1:c4"), IndexType.CCINDEX);
 //    index[1] = new IndexSpecification(Bytes.toBytes("f1:c1"), IndexType.SECONDARYINDEX);
-//    
 //    index[2] = new IndexSpecification(Bytes.toBytes("f2:c3"), IndexType.IMPSECONDARYINDEX);
 //    index[2].addAdditionColumn(Bytes.toBytes("f1"), Bytes.toBytes("c1"));
 //    index[2].addAdditionColumn(Bytes.toBytes("f1"), Bytes.toBytes("c2"));
-//    
 //    index[3] = new IndexSpecification(Bytes.toBytes("f3:c4"), IndexType.CCINDEX);
 //    //index[2].addAdditionFamily(Bytes.toBytes("f3"));
 //
-    indexDesc = new IndexTableDescriptor(desc, index);
-    
-    
-	 if (admin.tableExists(tableName)) {
-	      admin.disableTable(tableName);
-	      admin.deleteTable(tableName);
-	    }
-    
-    indexadmin.createTable(indexDesc);
-//	 admin.createTable(desc);
+//    indexDesc = new IndexTableDescriptor(desc, index);
+//    indexadmin.createTable(indexDesc);
 
     // table without index
     /*
@@ -81,7 +68,11 @@ public class CreateTableTestBulkload {
     newIndexDesc = new IndexTableDescriptor(newdesc);
     indexadmin.createTable(newIndexDesc);
     */
+    if (admin.tableExists(tableName)) {
+	      admin.disableTable(tableName);
+	      admin.deleteTable(tableName);
+	    }
+    admin.createTable(desc);
     System.out.println("Create table finished!");
-    return;
   }
 }

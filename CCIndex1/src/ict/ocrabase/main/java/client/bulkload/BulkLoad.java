@@ -297,7 +297,7 @@ public class BulkLoad {
 
 		config = conf;
 		//**********************************qihouliang*****************/
-		config.set("fs.default.name","data12:9000");
+//		config.set("fs.default.name","data12:9000");
 		//**********************************qihouliang*****************/
 		fs = FileSystem.get(config);
 		admin = new HBaseAdmin(config);
@@ -314,7 +314,7 @@ public class BulkLoad {
 		indexTableName = getAllIndexTableName(t);
 		
 //////////////////////////////qihouliang-test/////////////////////////////
-		System.out.println("indexTableName.toString()--------->"+indexTableName.toString());
+//		System.out.println("indexTableName.toString()--------->"+indexTableName.toString());
 //////////////////////////////qihouliang-test/////////////////////////////
 
 		// write all index table information to config
@@ -325,7 +325,7 @@ public class BulkLoad {
 				+ "_tmp");
 		
 //////////////////////////////qihouliang-test/////////////////////////////
-System.out.println("tempDir--------->"+tempDir.toString());
+//System.out.println("tempDir--------->"+tempDir.toString());
 //////////////////////////////qihouliang-test/////////////////////////////
 		if (fs.exists(tempDir))
 			throw new IOException("Dir "+tempDir.toString()+" is existed!");

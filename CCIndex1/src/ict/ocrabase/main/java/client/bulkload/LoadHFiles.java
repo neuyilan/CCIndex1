@@ -455,7 +455,7 @@ HFile.Reader hfr = HFile.createReader(fs, hfilePath, new CacheConfig(config), co
   	             
   								        	famPaths.add(Pair.newPair(family, hfilePath.toString()));
   								        	
-  								        	System.out.println("family-hfilepath: "+family+' '+hfilePath.toString());
+//  								        	System.out.println("family-hfilepath: "+family+' '+hfilePath.toString());
   	                     
   								        	BulkLoadHFileRequest request =                      
   								        			RequestConverter.buildBulkLoadHFileRequest(famPaths, regionName, true);
